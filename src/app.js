@@ -1,0 +1,84 @@
+import { createInterface } from 'readline/promises';
+import { resolve } from 'path';
+import * as fs from './commands/fs.js';
+import * as nwd from './commands/nwd.js';
+
+export const app = (username, homedir) => {
+ let curDir = homedir;
+
+ const rl = createInterface({
+     input: process.stdin,
+     output: process.stdout
+ });
+
+ process.on('exit', () => console.log(`\nThank you for using File Manager, ${username}, goodbye !`));
+
+ process.on('SIGINT', () => {
+     process.exit();
+ });
+
+ rl.on('line', async (input) => {
+     if (input === '.exit') {
+         process.exit();
+     }
+     else if (input === 'up') await up();
+     else if (input.startsWith('cd ')) {
+         const newPath = input.substring(3).trim();
+         await cd(newPath);
+     }
+     else if (input === 'ls') {
+         await nwd.ls(curDir); 
+     }
+     else if (input.startsWith('cat ')) {
+         const path = input.substring(4).trim();
+         await fs.cat(path);
+     }
+     else if (input.startsWith('add ')) {
+         const filePath = input.substring(4).trim();
+         await fs.add(resolve(curDir, filePath));
+     }
+     else if (input.startsWith('rn ')) {
+         const args = input.substring(3).trim().split(' ');
+         if (args.length === 2) {
+             const filePath = resolve(curDir, args[0]);
+             const properFileName = args[1];
+             await fs.rn(filePath, properFileName);
+         }
+     }
+     else if (input.startsWith('cp ')) {
+         const args = input.substring(3).trim().split(' ');
+         if (args.length === 2) {
+             const sourcePath = resolve(curDir, args[0]);
+             const destinationDir = resolve(curDir, args[1]);
+             await fs.cp(sourcePath, destinationDir);
+         }
+     }
+     else if (input.startsWith('mv ')) {
+         const args = input.substring(3).trim().split(' ');
+         if (args.length === 2) {
+             const sourcePath = resolve(curDir, args[0]);
+             const destinationDir = resolve(curDir, args[1]);
+             await fs.mv(sourcePath, destinationDir);
+         }
+     }
+     else if (input.startsWith('rm ')) {
+         const filePath = input.substring(3).trim();
+         await fs.rm(resolve(curDir, filePath));
+     } else console.error('Invalid input');
+ });
+
+ const up = async() => {
+     try {
+         curDir = resolve(curDir, '..');
+         console.log(`You are currently in ${curDir}`);
+         return curDir;
+     } catch(error) {
+         throw new Error(error);
+     }
+ }
+
+ const cd = async(newDir) => {
+     curDir = await nwd.cd(curDir, newDir);
+     return curDir;
+ };
+}
