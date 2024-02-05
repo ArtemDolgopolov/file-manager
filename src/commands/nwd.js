@@ -5,7 +5,6 @@ const cd = async(curDir, newDir) => {
     try {
         const newPath = resolve(curDir, newDir);
         await access(newPath);
-        console.log(`You are currently in ${newPath}`);
         return newPath;
     } catch {
         throw new Error('This directory does not exist')

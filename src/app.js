@@ -2,6 +2,7 @@ import { createInterface } from 'readline/promises';
 import { resolve } from 'path';
 import * as fs from './commands/fs.js';
 import * as nwd from './commands/nwd.js';
+import { operatingSystem } from './commands/os.js';
 
 export const app = (username, homedir) => {
  let curDir = homedir;
@@ -64,13 +65,17 @@ export const app = (username, homedir) => {
      else if (input.startsWith('rm ')) {
          const filePath = input.substring(3).trim();
          await fs.rm(resolve(curDir, filePath));
+     }
+     else if (input.startsWith('os ')) {
+         const arg = input.substring(3).trim();
+         operatingSystem(arg);
      } else console.error('Invalid input');
+     console.log(`You are currently in ${curDir}`);
  });
 
  const up = async() => {
      try {
          curDir = resolve(curDir, '..');
-         console.log(`You are currently in ${curDir}`);
          return curDir;
      } catch(error) {
          throw new Error(error);
