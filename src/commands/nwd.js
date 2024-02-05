@@ -1,14 +1,15 @@
 import { resolve, join } from 'path';
 import { access, readdir, stat } from 'fs/promises';
 
-const cd = async(curDir, newDir) => {
-    try {
-        const newPath = resolve(curDir, newDir);
-        await access(newPath);
-        return newPath;
-    } catch {
-        throw new Error('This directory does not exist')
-    }
+const cd = async (curDir, newDir) => {
+ try {
+     const newPath = resolve(curDir, newDir);
+     await access(newPath);
+     return newPath;
+ } catch (error) {
+     console.error('This directory does not exist');
+     return curDir;
+ }
 };
 
 const ls = async(curDir) => {

@@ -1,21 +1,30 @@
-import { access } from 'fs';
+import { stat } from 'fs/promises';
 import { readFile } from 'fs/promises';
 const { createHash } = await import('node:crypto');
 
 const calculateHash = async (path) => {
- const hash = createHash('sha256');
+    try {
+        const pathStats = await stat(path);
+        if (!pathStats.isFile()) {
+            console.error('Unable to calculate hash: Path is not a file');
+            return;
+        }
+    } catch (error) {
+        console.error('Unable to calculate hash: file does not exist');
+        return;
+    }
 
- try {
-    const file = await readFile(path);
-    hash.update(file);
+    const hash = createHash('sha256');
 
-    const fileHash = hash.digest('hex');
-    console.log(fileHash);
- } catch {
-     console.log('Unable to calculate hash');
- }
+    try {
+        const fileContent = await readFile(path);
+        hash.update(fileContent);
 
- if (!(await access(path))) console.log('This file does not exist');
+        const fileHash = hash.digest('hex');
+        console.log(fileHash);
+    } catch (error) {
+        console.error('Unable to calculate hash: Error reading file');
+    }
 };
 
 export { calculateHash };

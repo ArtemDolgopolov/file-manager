@@ -26,7 +26,8 @@ export const app = (username, homedir) => {
      else if (input === 'up') await up();
      else if (input.startsWith('cd ')) {
          const newPath = input.substring(3).trim();
-         await cd(newPath);
+         const newDir = await cd(newPath);
+         if (newPath) curDir = newDir;
      }
      else if (input === 'ls') {
          await nwd.ls(curDir); 

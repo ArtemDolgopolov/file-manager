@@ -4,6 +4,13 @@ import { basename, dirname, join, resolve } from 'path';
 import { unlink } from 'fs/promises';
 
 const cat = async(path) => {
+    try {
+        await access(path);
+    } catch (error) {
+        console.error('No such file');
+        return;
+    }
+
     const fileToRead = createReadStream(path, 'utf-8');
 
     fileToRead.on('data', (chunk) => {
@@ -21,38 +28,45 @@ const add = async(filePath) => {
             flag: 'wx'
         });
     } catch(error) {
-        console.error('Failed to add file:', error.message);
+        console.error('Failed to add file.', error.message);
     }
 };
 
-const rn = async(filePath, properFileName) => {
+const rn = async (filePath, properFileName) => {
     const directory = dirname(filePath);
     const newFilePath = join(directory, properFileName);
 
     try {
-        await rename(filePath, newFilePath);
-    } catch(error) {
-        if (error.code === 'EEXIST') {
-            console.error('File with that name already exists');
-        } else if (error.code === 'ENOENT') {
-            console.error('No such original file');
-        } else {
+        await access(filePath);
+    } catch (error) {
+        console.error('No such original file');
+        return;
+    }
+
+    try {
+        await access(newFilePath);
+        console.error('File with that name already exists');
+        return;
+    } catch (error) {
+        try {
+            await rename(filePath, newFilePath);
+        } catch (error) {
             console.error('Error during renaming a file:', error.message);
         }
     }
 };
 
-const cp = async(sourcePath, destinationDir) => {
+const cp = async (sourcePath, destinationDir) => {
     try {
         await access(sourcePath);
-    } catch(error) {
+    } catch (error) {
         console.error('No such original file');
         return;
     }
 
     try {
         await access(destinationDir);
-    } catch {
+    } catch (error) {
         console.error('No such destination directory');
         return;
     }
@@ -110,7 +124,7 @@ const rm = async(filePath) => {
     try {
         await unlink(filePath);
     } catch(error) {
-        console.error('Failed to remove file:', error.message);
+        console.error('File does not exist.');
     }
 };
 
