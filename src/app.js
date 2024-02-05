@@ -3,6 +3,7 @@ import { resolve } from 'path';
 import * as fs from './commands/fs.js';
 import * as nwd from './commands/nwd.js';
 import { operatingSystem } from './commands/os.js';
+import { calculateHash } from './commands/hash.js';
 
 export const app = (username, homedir) => {
  let curDir = homedir;
@@ -69,6 +70,10 @@ export const app = (username, homedir) => {
      else if (input.startsWith('os ')) {
          const arg = input.substring(3).trim();
          operatingSystem(arg);
+     }
+     else if (input.startsWith('hash ')) {
+         const path = input.substring(5).trim();
+         calculateHash(path);
      } else console.error('Invalid input');
      console.log(`You are currently in ${curDir}`);
  });
