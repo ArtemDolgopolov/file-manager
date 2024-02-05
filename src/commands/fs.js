@@ -20,6 +20,11 @@ const cat = async(path) => {
     fileToRead.on('end', () => {
         process.stdout.write('\n');
     });
+
+    await new Promise((resolve, reject) => {
+        fileToRead.on("end", () => resolve());
+        fileToRead.on("error", () =>  reject());
+    });
 };
 
 const add = async(filePath) => {

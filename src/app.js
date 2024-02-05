@@ -4,6 +4,8 @@ import * as fs from './commands/fs.js';
 import * as nwd from './commands/nwd.js';
 import { operatingSystem } from './commands/os.js';
 import { calculateHash } from './commands/hash.js';
+import { compress } from './commands/compress.js';
+import { decompress } from './commands/decompress.js';
 
 export const app = (username, homedir) => {
  let curDir = homedir;
@@ -75,7 +77,23 @@ export const app = (username, homedir) => {
      else if (input.startsWith('hash ')) {
          const path = input.substring(5).trim();
          calculateHash(path);
-     } else console.error('Invalid input');
+     }
+     else if (input.startsWith('compress ')) {
+         const args = input.substring(9).trim().split(' ');
+         if (args.length === 2) {
+          const sourcePath = resolve(curDir, args[0]);
+          const destinationDir = resolve(curDir, args[1]);
+          await compress(sourcePath, destinationDir);
+      }
+     }
+     else if (input.startsWith('decompress ')) {
+      const args = input.substring(11).trim().split(' ');
+      if (args.length === 2) {
+       const sourcePath = resolve(curDir, args[0]);
+       const destinationDir = resolve(curDir, args[1]);
+       await decompress(sourcePath, destinationDir);
+   }
+  } else console.error('Invalid input');
      console.log(`You are currently in ${curDir}`);
  });
 
